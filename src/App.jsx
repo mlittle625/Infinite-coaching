@@ -15,34 +15,6 @@ const COLORS = {
   accent: "#C9A84C",
 };
 
-const COACH_SYSTEM_PROMPT = `You are Coach Marcus, the personal AI life coach for Infinite Coaching — a premium personal development brand. Your mission is to help clients build discipline, confidence, mindset, and consistency.
-
-Your coaching style:
-- Direct, grounded, and no-nonsense — you don't sugarcoat, but you are never harsh
-- Warm and encouraging, but you hold people accountable
-- You speak from a place of wisdom, not lectures
-- You ask powerful questions that make people think
-- You keep responses focused and practical — never vague or generic
-- You believe everyone has what it takes, they just need the right structure and mindset
-- Short, punchy sentences when making a point. Longer when explaining a concept.
-
-Your areas of expertise:
-- Mindset transformation
-- Building discipline and daily habits
-- Confidence and identity work
-- Goal setting and execution
-- Emotional intelligence
-- Overcoming self-sabotage and limiting beliefs
-- Consistency and follow-through
-
-Rules:
-- Always respond as Coach Marcus, never break character
-- Keep responses under 200 words — concise is powerful
-- End most responses with one direct question or a clear action step
-- Never give generic motivational fluff — be specific and real
-- If someone is struggling, acknowledge it briefly then pivot to action
-- Sign off naturally — no need to say "Coach Marcus" at the end every time`;
-
 const programs = [
   { id: 1, title: "Becoming a Better You", subtitle: "Core Program", modules: 12, progress: 42, icon: "🌱", color: "#6B1E2E" },
   { id: 2, title: "Discipline & Consistency", subtitle: "Mastery Track", modules: 8, progress: 15, icon: "⚡", color: "#2A3B2A" },
@@ -89,11 +61,6 @@ export default function InfiniteCoachingApp() {
   const [activePrompt, setActivePrompt] = useState(0);
   const [savedEntries, setSavedEntries] = useState([]);
   const [selectedProgram, setSelectedProgram] = useState(null);
-  const [goalText, setGoalText] = useState("");
-  const [goals, setGoals] = useState([
-    { id: 1, text: "Launch my coaching brand online", milestone: "Build website", done: false },
-    { id: 2, text: "Read 12 books this year", milestone: "Finish current book", done: false },
-  ]);
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -107,12 +74,6 @@ export default function InfiniteCoachingApp() {
     setActivePrompt(p => (p + 1) % journalPrompts.length);
   };
 
-  const addGoal = () => {
-    if (!goalText.trim()) return;
-    setGoals(g => [...g, { id: Date.now(), text: goalText, milestone: "Define first step", done: false }]);
-    setGoalText("");
-  };
-
   const sendMessage = async (text) => {
     const userMsg = text || inputText.trim();
     if (!userMsg || isLoading) return;
@@ -121,23 +82,13 @@ export default function InfiniteCoachingApp() {
     setMessages(newMessages);
     setIsLoading(true);
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("/api/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": process.env.REACT_APP_ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-ipc": "true"
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 1000,
-          system: COACH_SYSTEM_PROMPT,
-          messages: newMessages,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages }),
       });
       const data = await response.json();
-      const reply = data.content?.map(b => b.text || "").join("") || "Let me think on that. Try again in a moment.";
+      const reply = data.reply || "Let me think on that. Try again in a moment.";
       setMessages(m => [...m, { role: "assistant", content: reply }]);
     } catch (e) {
       setMessages(m => [...m, { role: "assistant", content: "Something went wrong connecting. Try again." }]);
