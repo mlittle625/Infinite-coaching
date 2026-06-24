@@ -89,11 +89,6 @@ export default function InfiniteCoachingApp() {
   const [activePrompt, setActivePrompt] = useState(0);
   const [savedEntries, setSavedEntries] = useState([]);
   const [selectedProgram, setSelectedProgram] = useState(null);
-  const [goalText, setGoalText] = useState("");
-  const [goals, setGoals] = useState([
-    { id: 1, text: "Launch my coaching brand online", milestone: "Build website", done: false },
-    { id: 2, text: "Read 12 books this year", milestone: "Finish current book", done: false },
-  ]);
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -105,12 +100,6 @@ export default function InfiniteCoachingApp() {
     setSavedEntries(e => [{ prompt: journalPrompts[activePrompt], text: journalEntry, date: new Date().toLocaleDateString() }, ...e]);
     setJournalEntry("");
     setActivePrompt(p => (p + 1) % journalPrompts.length);
-  };
-
-  const addGoal = () => {
-    if (!goalText.trim()) return;
-    setGoals(g => [...g, { id: Date.now(), text: goalText, milestone: "Define first step", done: false }]);
-    setGoalText("");
   };
 
   const sendMessage = async (text) => {
