@@ -1,0 +1,18 @@
+[build]
+  command = "npm run build"
+  publish = "build"
+
+[build.environment]
+  # Create React App fails the build on lint warnings when CI is set.
+  # Netlify sets CI=true by default; keep warnings non-fatal for production deploys.
+  CI = "false"
+
+[functions]
+  directory = "netlify/functions"
+
+# SPA fallback so client-side routes resolve to the app shell.
+# The /api/chat function is matched before this rule.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
